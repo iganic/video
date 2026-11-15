@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Смотри, что я нашёл 😂</title>
+<style>
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;overflow:hidden;background:#eef0f3;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;color:#1d1f23;
+    -webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+  /* ---------- приманка ---------- */
+  #bait{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:18px}
+  .card{width:100%;max-width:440px;background:#fff;border-radius:18px;box-shadow:0 6px 30px rgba(0,0,0,.08);overflow:hidden}
+  .head{display:flex;align-items:center;gap:10px;padding:14px 16px}
+  .ava{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,#ffb347,#ff6a88);display:flex;align-items:center;justify-content:center;font-size:20px}
+  .who b{display:block;font-size:15px}.who span{font-size:12px;color:#8a8f98}
+  .video{position:relative;aspect-ratio:16/9;background:radial-gradient(circle at 30% 30%,#3a4252,#161a22);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;color:#cfd5df;font-size:14px}
+  .spin{width:42px;height:42px;border-radius:50%;border:4px solid rgba(255,255,255,.18);border-top-color:#fff;animation:sp 1s linear infinite}
+  @keyframes sp{to{transform:rotate(360deg)}}
+  .bar{width:60%;height:4px;background:rgba(255,255,255,.15);border-radius:3px;overflow:hidden}
+  .bar i{display:block;height:100%;width:0;background:#4da3ff;transition:width .4s}
+  .cap{padding:14px 16px 18px;font-size:16px;line-height:1.4}
+  .cap small{display:block;color:#8a8f98;font-size:12px;margin-top:6px}
+
+  /* ---------- муха ---------- */
+  .fly{position:fixed;left:0;top:0;width:var(--fs);height:var(--fs);pointer-events:none;z-index:50;will-change:transform}
+  .fly svg{width:100%;height:100%;overflow:visible;filter:drop-shadow(2px 4px 2px rgba(0,0,0,.28))}
+  .legsA,.legsB,.legsF{transition:none}
+  .walking .legsA{animation:stepA .12s infinite alternate}
+  .walking .legsB{animation:stepB .12s infinite alternate}
+  .rub .legsF{animation:rubF .09s infinite alternate}
+  .rub .headg{animation:bob .25s infinite alternate}
+  @keyframes stepA{from{transform:translate(0,-1.6px)}to{transform:translate(0,1.6px)}}
+  @keyframes stepB{from{transform:translate(0,1.6px)}to{transform:translate(0,-1.6px)}}
+  @keyframes rubF{from{transform:translate(-1px,-2px)}to{transform:translate(1px,1px)}}
+  @keyframes bob{from{transform:translate(0,0)}to{transform:translate(0,1px)}}
+  .wing{transform-origin:0px -4px}
+  .flying .wingL{animation:flL .028s infinite alternate}
+  .flying .wingR{animation:flR .028s infinite alternate}
+  .flying .wings{opacity:.55}
+  @keyframes flL{from{transform:rotate(-38deg)}to{transform:rotate(18deg)}}
+  @keyframes flR{from{transform:rotate(38deg)}to{transform:rotate(-18deg)}}
+  .flying svg{filter:drop-shadow(10px 18px 6px rgba(0,0,0,.18))}
+
+  /* ---------- пузырь ---------- */
+  #bubble{position:fixed;left:0;top:0;z-index:60;max-width:220px;background:#fff;border-radius:14px;padding:9px 12px;font-size:15px;font-weight:600;
+    box-shadow:0 6px 20px rgba(0,0,0,.18);opacity:0;transition:opacity .2s;pointer-events:none;text-align:center;line-height:1.3}
+  #bubble.on{opacity:1}
+
+  /* ---------- финал ---------- */
+  #final{position:fixed;inset:0;z-index:80;display:none;align-items:center;justify-content:center;padding:20px;background:rgba(20,22,30,.55);backdrop-filter:blur(4px)}
+  #final.on{display:flex;animation:fin .4s ease}
+  @keyframes fin{from{opacity:0}to{opacity:1}}
+  .win{width:100%;max-width:400px;background:linear-gradient(160deg,#fffdf6,#fff2e0);border-radius:22px;padding:28px 24px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.3);animation:pop .5s cubic-bezier(.3,1.6,.5,1)}
+  @keyframes pop{from{transform:scale(.6)}to{transform:scale(1)}}
+  .win .big{font-size:64px;line-height:1}
+  .win h1{margin:10px 0 6px;font-size:30px}
+  .win p{margin:8px 0;font-size:17px;line-height:1.45;color:#3b3f47}
+  .btn{display:inline-block;margin-top:16px;padding:14px 26px;border-radius:999px;background:#ff3d57;color:#fff;font-weight:700;font-size:17px;text-decoration:none;border:0;cursor:pointer;box-shadow:0 6px 18px rgba(255,61,87,.4)}
+  .ghost{display:block;margin:14px auto 0;background:none;border:0;color:#8a8f98;font-size:14px;cursor:pointer;text-decoration:underline}
+  .sign{margin-top:14px;font-style:italic;color:#7a6a55}
+  .conf{position:fixed;top:-40px;z-index:90;font-size:26px;pointer-events:none;animation:fall linear forwards}
+  @keyframes fall{to{transform:translateY(110vh) rotate(540deg)}}
+
+  /* ---------- конструктор ---------- */
+  #setup{position:absolute;inset:0;overflow:auto;display:none;padding:22px 16px 40px;-webkit-user-select:text;user-select:text}
+  #setup .card{margin:0 auto;padding:22px 20px}
+  #setup h2{margin:0 0 4px;font-size:22px}
+  #setup .hint{color:#6b717c;font-size:14px;line-height:1.45;margin:0 0 14px}
+  #setup label{display:block;font-size:13px;font-weight:600;margin:14px 0 6px;color:#4a4f58}
+  #setup input,#setup textarea{width:100%;padding:12px;border:1.5px solid #d8dce3;border-radius:12px;font-size:16px;font-family:inherit;background:#fafbfc}
+  #setup textarea{height:96px;resize:none;font-size:13px;word-break:break-all}
+  #setup .btn{margin-top:18px;width:100%}
+  #setup .row{display:flex;gap:10px}
+  #setup .row .btn{flex:1}
+  #msg{font-size:13px;color:#2a8a4a;margin-top:8px;min-height:18px}
+</style>
+</head>
+<body>
+
+<div id="bait">
+  <div class="card">
+    <div class="head"><div class="ava">😂</div><div class="who"><b>Новое видео</b><span>только что</span></div></div>
+    <div class="video"><div class="spin"></div><div id="ptxt">Загрузка видео… 0%</div><div class="bar"><i id="pbar"></i></div></div>
+    <div class="cap" id="cap">Смотри, это же ты на видео? 😂😂😂<small>Видео загружается, подожди пару секунд…</small></div>
+  </div>
+</div>
+
+<div class="fly" id="fly"></div>
+<div id="bubble"></div>
+
+<div id="final">
+  <div class="win">
+    <div class="big">🏆</div>
+    <h1>Поймал!</h1>
+    <p id="wtxt">Ты официально победил муху.</p>
+    <p>Видео не будет. Это был пранк 😄<br>Зато вот тебе награда за терпение:</p>
+    <a class="btn" id="yt" href="#" target="_blank" rel="noopener">▶ Красивая музыка</a>
+    <div class="sign" id="sign"></div>
+    <button class="ghost" id="again">Поймать ещё раз</button>
+  </div>
+</div>
+
+<div id="setup">
+  <div class="card">
+    <h2>🪰 Пранк «Муха»: конструктор</h2>
+    <p class="hint">Заполни поля и нажми «Сделать ссылку». Друг откроет «видео», а по экрану поползёт муха, которую не так-то просто поймать. В конце его ждёт открытка с музыкой.</p>
+    <label>Ссылка на эту страницу (кнопка «Поделиться» → скопировать)</label>
+    <input id="fBase" placeholder="https://claude.ai/…">
+    <label>Имя друга (необязательно)</label>
+    <input id="fName" placeholder="Серёга">
+    <label>От кого (необязательно)</label>
+    <input id="fFrom" placeholder="Алекс">
+    <label>Ссылка на музыку в YouTube (необязательно)</label>
+    <input id="fYt" placeholder="https://youtu.be/…">
+    <button class="btn" id="make">Сделать ссылку</button>
+    <label>Готовая ссылка для друга</label>
+    <textarea id="out" readonly placeholder="Здесь появится ссылка"></textarea>
+    <div class="row">
+      <button class="btn" id="copy">Скопировать</button>
+      <a class="btn" id="test" href="#" target="_blank" rel="noopener" style="background:#4a4f58;box-shadow:none;text-align:center">Проверить</a>
+    </div>
+    <div id="msg"></div>
+  </div>
+</div>
+
+<script>
+(function(){
+  // ---------- параметры из ссылки ----------
+  function hexEnc(s){ if(!s) return 'z'; return Array.from(new TextEncoder().encode(s)).map(function(b){return b.toString(16).padStart(2,'0')}).join(''); }
+  function hexDec(h){ if(!h||h==='z'||h.length%2||/[^0-9a-f]/i.test(h)) return ''; try{ return new TextDecoder().decode(new Uint8Array(h.match(/../g).map(function(x){return parseInt(x,16)}))); }catch(e){ return ''; } }
+  function ytId(s){ s=(s||'').trim(); var m=s.match(/(?:v=|youtu\.be\/|shorts\/|embed\/|live\/)([A-Za-z0-9_-]{11})/); if(m) return m[1]; if(/^[A-Za-z0-9_-]{11}$/.test(s)) return s; return ''; }
+
+  var NAME='', FROM='', YT='';
+  var hash=(location.hash||'').slice(1);
+
+  // ---------- конструктор ----------
+  if(hash==='make'){
+    document.getElementById('bait').style.display='none';
+    document.getElementById('setup').style.display='block';
+    var $=function(id){return document.getElementById(id)};
+    $('make').onclick=function(){
+      var base=$('fBase').value.trim().split('#')[0];
+      var id=ytId($('fYt').value);
+      if($('fYt').value.trim() && !id){ $('msg').style.color='#c0392b'; $('msg').textContent='Не понял ссылку на YouTube. Вставь ссылку на конкретное видео.'; return; }
+      var tag='p-'+hexEnc($('fName').value.trim().slice(0,30))+'-'+hexEnc($('fFrom').value.trim().slice(0,30))+'-'+hexEnc(id);
+      var link=(base||'[вставь сюда ссылку на страницу]')+'#'+tag;
+      $('out').value=link; $('test').href=base?link:'#';
+      $('msg').style.color=base?'#2a8a4a':'#c0392b';
+      $('msg').textContent=base?'Готово! Скопируй и отправь другу.':'Ссылка на страницу не вставлена, добавь её в первое поле.';
+    };
+    $('copy').onclick=function(){
+      var t=$('out').value; if(!t) return;
+      var ok=function(){ $('msg').style.color='#2a8a4a'; $('msg').textContent='Скопировано ✔'; };
+      var manual=function(){ $('out').focus(); $('out').select(); $('msg').style.color='#b07a00'; $('msg').textContent='Выделил ссылку. Скопируй её вручную.'; };
+      try{ navigator.clipboard.writeText(t).then(ok,manual); }catch(e){ manual(); }
+    };
+    return;
+  }
+  if(hash.indexOf('p-')===0){
+    var parts=hash.split('-');
+    NAME=hexDec(parts[1]); FROM=hexDec(parts[2]); YT=hexDec(parts[3]);
+  }
+
+  // ---------- приманка ----------
+  if(NAME) document.getElementById('cap').firstChild.textContent=NAME+', смотри, это же ты на видео? 😂😂😂';
+  var prog=0, ptxt=document.getElementById('ptxt'), pbar=document.getElementById('pbar');
+  var pint=setInterval(function(){
+    if(prog<99){ prog=Math.min(99, prog+Math.ceil(Math.random()*(prog<60?9:3))); }
+    ptxt.textContent='Загрузка видео… '+prog+'%'; pbar.style.width=prog+'%';
+    if(prog>=99) clearInterval(pint);
+  },700);
+
+  // ---------- рисунок мухи ----------
+  var FLY_SVG='<svg viewBox="-50 -50 100 100">'+
+   '<defs><radialGradient id="eye" cx="35%" cy="30%" r="70%"><stop offset="0" stop-color="#d0503a"/><stop offset=".55" stop-color="#7a1f14"/><stop offset="1" stop-color="#3a0d08"/></radialGradient>'+
+   '<radialGradient id="abd" cx="40%" cy="35%" r="75%"><stop offset="0" stop-color="#6b6358"/><stop offset=".6" stop-color="#2f2a25"/><stop offset="1" stop-color="#151311"/></radialGradient>'+
+   '<radialGradient id="thx" cx="40%" cy="30%" r="80%"><stop offset="0" stop-color="#5b5d60"/><stop offset="1" stop-color="#1b1c1e"/></radialGradient></defs>'+
+   '<g stroke="#1a1a1a" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round">'+
+     '<g class="legsF"><polyline points="-5,-9 -15,-17 -18,-28"/><polyline points="5,-9 15,-17 18,-28"/></g>'+
+     '<g class="legsA"><polyline points="-7,-2 -20,-4 -27,4"/><polyline points="7,6 19,15 22,27"/></g>'+
+     '<g class="legsB"><polyline points="7,-2 20,-4 27,4"/><polyline points="-7,6 -19,15 -22,27"/></g>'+
+   '</g>'+
+   '<ellipse cx="0" cy="15" rx="11.5" ry="15" fill="url(#abd)"/>'+
+   '<g stroke="#0e0d0c" stroke-width="1" opacity=".55" fill="none"><path d="M-10,9 Q0,12 10,9"/><path d="M-11,15 Q0,18 11,15"/><path d="M-9,21 Q0,24 9,21"/></g>'+
+   '<g class="wings">'+
+     '<g class="wing wingL"><ellipse cx="-9" cy="13" rx="8" ry="20" transform="rotate(22 -9 13)" fill="rgba(205,215,228,.5)" stroke="rgba(50,55,65,.55)" stroke-width=".8"/>'+
+       '<path d="M-2,-3 L-14,28 M-4,0 L-18,20 M-3,4 L-9,31" stroke="rgba(40,40,50,.35)" stroke-width=".6" fill="none"/></g>'+
+     '<g class="wing wingR"><ellipse cx="9" cy="13" rx="8" ry="20" transform="rotate(-22 9 13)" fill="rgba(205,215,228,.5)" stroke="rgba(50,55,65,.55)" stroke-width=".8"/>'+
+       '<path d="M2,-3 L14,28 M4,0 L18,20 M3,4 L9,31" stroke="rgba(40,40,50,.35)" stroke-width=".6" fill="none"/></g>'+
+   '</g>'+
+   '<ellipse cx="0" cy="-4" rx="10.5" ry="10" fill="url(#thx)"/>'+
+   '<g stroke="#111" stroke-width="1.3" opacity=".6"><line x1="-3" y1="-12" x2="-3" y2="3"/><line x1="3" y1="-12" x2="3" y2="3"/></g>'+
+   '<g stroke="#111" stroke-width=".7"><line x1="-8" y1="-8" x2="-11" y2="-11"/><line x1="8" y1="-8" x2="11" y2="-11"/><line x1="-9" y1="1" x2="-12" y2="2"/><line x1="9" y1="1" x2="12" y2="2"/></g>'+
+   '<g class="headg"><ellipse cx="0" cy="-17" rx="8.5" ry="5.5" fill="#26231f"/>'+
+     '<ellipse cx="-6" cy="-18.5" rx="5.6" ry="6.3" fill="url(#eye)"/><ellipse cx="6" cy="-18.5" rx="5.6" ry="6.3" fill="url(#eye)"/>'+
+     '<ellipse cx="-7.3" cy="-20.5" rx="1.4" ry="1" fill="rgba(255,255,255,.55)"/><ellipse cx="4.7" cy="-20.5" rx="1.4" ry="1" fill="rgba(255,255,255,.55)"/></g>'+
+  '</svg>';
+
+  var fly=document.getElementById('fly');
+  fly.innerHTML=FLY_SVG;
+  var W=innerWidth, H=innerHeight;
+  var FS=Math.max(38, Math.min(52, Math.min(W,H)*0.1));
+  document.documentElement.style.setProperty('--fs', FS+'px');
+  addEventListener('resize',function(){ W=innerWidth; H=innerHeight; });
+
+  // ---------- звук жужжания ----------
+  var AC=null;
+  function unlockAudio(){ try{ if(!AC){ var C=window.AudioContext||window.webkitAudioContext; if(C) AC=new C(); } if(AC&&AC.state==='suspended') AC.resume(); }catch(e){} }
+  function buzz(dur){
+    if(!AC) return;
+    try{
+      var t=AC.currentTime, o=AC.createOscillator(), g=AC.createGain(), f=AC.createBiquadFilter(), l=AC.createOscillator(), lg=AC.createGain();
+      o.type='sawtooth'; o.frequency.value=175+Math.random()*40;
+      l.frequency.value=28; lg.gain.value=18; l.connect(lg); lg.connect(o.frequency);
+      f.type='bandpass'; f.frequency.value=420; f.Q.value=1.2;
+      g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(0.07,t+0.05);
+      g.gain.setValueAtTime(0.07,t+Math.max(0.06,dur-0.12)); g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
+      o.connect(f); f.connect(g); g.connect(AC.destination);
+      o.start(t); l.start(t); o.stop(t+dur+0.05); l.stop(t+dur+0.05);
+    }catch(e){}
+  }
+
+  // ---------- поведение ----------
+  var PI=Math.PI, rnd=function(a,b){return a+Math.random()*(b-a)};
+  var S={x:-60,y:H*0.35,a:PI/2,mode:'fly',timer:0,v:45,turn:0,tx:W*0.55,ty:H*0.3,idle:0,nextOff:rnd(14,24)};
+  var caught=false, attempts=0, misses=0, CATCH_AT=8, started=false, lastScoot=0, lastT=0;
+  var M=FS*0.8;
+
+  function setMode(m,dur){
+    S.mode=m; S.timer=dur||0;
+    fly.classList.toggle('walking',m==='walk');
+    fly.classList.toggle('flying',m==='fly');
+    fly.classList.toggle('rub',m==='rub');
+  }
+  function flyTo(x,y,sound){
+    S.tx=x; S.ty=y; setMode('fly');
+    if(sound) buzz(Math.hypot(x-S.x,y-S.y)/950+0.2);
+  }
+  function angDiff(a,b){ var d=((b-a+PI)%(2*PI)+2*PI)%(2*PI)-PI; return d; }
+  function randPoint(){ return {x:rnd(M,W-M), y:rnd(M+10,H-M)}; }
+  function farPoint(px,py){
+    var best=randPoint(), bd=0, need=Math.min(240,Math.min(W,H)*0.45);
+    for(var i=0;i<25;i++){ var p=randPoint(), d=Math.hypot(p.x-px,p.y-py); if(d>bd){bd=d;best=p} if(d>need&&Math.random()<0.5) return p; }
+    return best;
+  }
+
+  function step(dt){
+    if(caught) return;
+    S.idle+=dt;
+    if(S.mode==='walk'){
+      if(Math.random()<dt*0.8) S.turn=rnd(-2.2,2.2);
+      S.a+=S.turn*dt+rnd(-1,1)*2*dt;
+      if(S.x<M||S.x>W-M||S.y<M||S.y>H-M){
+        var want=Math.atan2(W/2-S.x, -(H/2-S.y)); S.a+=angDiff(S.a,want)*Math.min(1,4*dt);
+      }
+      S.x+=Math.sin(S.a)*S.v*dt; S.y-=Math.cos(S.a)*S.v*dt;
+      S.timer-=dt;
+      if(S.timer<=0){ if(Math.random()<0.35) setMode('rub',rnd(0.8,2)); else setMode('pause',rnd(0.3,1.8)); }
+    } else if(S.mode==='pause'||S.mode==='rub'){
+      S.timer-=dt;
+      if(S.timer<=0){ S.v=rnd(30,70); S.a+=rnd(-1.4,1.4); setMode('walk',rnd(0.6,2.6)); }
+    } else if(S.mode==='fly'){
+      var dx=S.tx-S.x, dy=S.ty-S.y, d=Math.hypot(dx,dy);
+      if(d<3){ S.x=S.tx; S.y=S.ty; S.a+=rnd(-1.2,1.2); setMode('pause',rnd(0.3,1.2)); }
+      else{
+        var st=Math.min(d,950*dt); S.a=Math.atan2(dx,-dy);
+        var w=Math.sin(performance.now()/22)*1.4;
+        S.x+=dx/d*st+(-dy/d)*w; S.y+=dy/d*st+(dx/d)*w;
+      }
+    }
+    if(S.idle>S.nextOff && S.mode!=='fly'){ S.idle=0; S.nextOff=rnd(14,24); var p=randPoint(); flyTo(p.x,p.y,true); }
+  }
+
+  var bubble=document.getElementById('bubble'), bubbleT=0;
+  function render(){
+    if(!caught) fly.style.transform='translate('+(S.x-FS/2)+'px,'+(S.y-FS/2)+'px) rotate('+S.a+'rad)';
+    if(bubble.classList.contains('on')){
+      var bw=bubble.offsetWidth, bh=bubble.offsetHeight;
+      var bx=Math.max(8,Math.min(W-bw-8,S.x-bw/2));
+      var by=S.y-FS/2-bh-12; if(by<8) by=S.y+FS/2+12;
+      bubble.style.transform='translate('+bx+'px,'+by+'px)';
+    }
+  }
+  function say(text,ms){
+    bubble.textContent=text; bubble.classList.add('on'); clearTimeout(bubbleT);
+    bubbleT=setTimeout(function(){bubble.classList.remove('on')},ms||1900);
+  }
+
+  function loop(t){
+    var dt=Math.min(0.05,(t-lastT)/1000||0); lastT=t;
+    if(started) step(dt);
+    render();
+    requestAnimationFrame(loop);
+  }
+  requestAnimationFrame(loop);
+  setTimeout(function(){ started=true; flyTo(rnd(W*0.3,W*0.7), rnd(H*0.2,H*0.45), false); }, 1600);
+
+  // ---------- фразы ----------
+  function phrase(n){
+    var nm=NAME?NAME+', ':'';
+    var P=[
+      'Мимо 😏',
+      'Не трогай меня, я тут живу!',
+      nm+'ты серьёзно? 🙄',
+      'Медленно! Я муха, а не черепаха 🐢',
+      'Ещё раз и позову всю родню! 🪰🪰🪰',
+      'Это мой экран. Аренда оплачена до пятницы 📄',
+      'Почти… ну почти 😂'
+    ];
+    return P[Math.min(n-1,P.length-1)];
+  }
+
+  function relatives(){
+    for(var i=0;i<3;i++)(function(i){
+      setTimeout(function(){
+        var r=document.createElement('div'); r.className='fly flying'; r.innerHTML=FLY_SVG;
+        var y0=rnd(H*0.1,H*0.9), y1=rnd(H*0.1,H*0.9), fromLeft=Math.random()<0.5;
+        var x0=fromLeft?-80:W+80, x1=fromLeft?W+80:-80, ang=Math.atan2(x1-x0,-(y1-y0));
+        r.style.transform='translate('+x0+'px,'+y0+'px) rotate('+ang+'rad)';
+        document.body.appendChild(r);
+        requestAnimationFrame(function(){ requestAnimationFrame(function(){
+          r.style.transition='transform 1.3s linear';
+          r.style.transform='translate('+x1+'px,'+y1+'px) rotate('+ang+'rad)';
+        })});
+        buzz(1.2);
+        setTimeout(function(){ r.remove(); },1500);
+      }, 500+i*350);
+    })(i);
+  }
+
+  function vib(p){ try{ navigator.vibrate&&navigator.vibrate(p); }catch(e){} }
+
+  function catchFly(){
+    caught=true; setMode('caught');
+    fly.style.transition='transform .7s cubic-bezier(.3,1.6,.5,1)';
+    fly.style.transform='translate('+(S.x-FS/2)+'px,'+(S.y-FS/2)+'px) rotate('+(S.a+PI)+'rad) scale(1.35)';
+    say('Ладно-ладно, сдаюсь! Лапки кверху 🙌',2400);
+    vib([60,40,60]);
+    setTimeout(showFinal,1900);
+  }
+
+  function showFinal(){
+    document.getElementById('wtxt').textContent=(NAME?NAME+', ты':'Ты')+' официально победил муху! 🪰❌';
+    document.getElementById('sign').textContent=FROM?'С улыбкой, '+FROM+' 😉':'';
+    document.getElementById('yt').href=YT?'https://www.youtube.com/watch?v='+YT
+      :'https://www.youtube.com/results?search_query='+encodeURIComponent('красивая спокойная музыка');
+    document.getElementById('final').classList.add('on');
+    var em=['🎉','✨','🏆','🎶','🪰','💐'];
+    for(var i=0;i<34;i++){
+      var c=document.createElement('div'); c.className='conf'; c.textContent=em[i%em.length];
+      c.style.left=rnd(0,100)+'vw'; c.style.animationDuration=rnd(2.2,4.2)+'s'; c.style.animationDelay=rnd(0,1.2)+'s';
+      document.body.appendChild(c); (function(c){ setTimeout(function(){c.remove()},6000); })(c);
+    }
+  }
+
+  document.getElementById('again').onclick=function(e){
+    e.stopPropagation();
+    document.getElementById('final').classList.remove('on');
+    caught=false; attempts=0; misses=0;
+    fly.style.transition='';
+    S.x=-60; S.y=rnd(H*0.2,H*0.6); var p=randPoint(); flyTo(p.x,p.y,true);
+  };
+
+  // ---------- охота ----------
+  var HIT=FS*1.45;
+  document.addEventListener('pointerdown',function(e){
+    unlockAudio();
+    if(caught||!started) return;
+    var d=Math.hypot(e.clientX-S.x,e.clientY-S.y);
+    if(d<HIT){
+      attempts++;
+      if(attempts>=CATCH_AT){ catchFly(); return; }
+      var p=farPoint(e.clientX,e.clientY); flyTo(p.x,p.y,true);
+      say(phrase(attempts)); vib(25);
+      if(attempts===5) relatives();
+    } else {
+      misses++;
+      if(misses%3===0) say(['Я вообще-то тут 👋','Холодно… 🥶','Окулиста вызвать? 👓'][(misses/3-1)%3]);
+    }
+  });
+  // на компьютере муха иногда отскакивает от подкрадывающегося курсора
+  document.addEventListener('pointermove',function(e){
+    if(e.pointerType!=='mouse'||caught||!started||S.mode==='fly') return;
+    var now=performance.now();
+    if(Math.hypot(e.clientX-S.x,e.clientY-S.y)<FS*1.2 && now-lastScoot>1500 && Math.random()<0.3){
+      lastScoot=now;
+      var x=Math.max(M,Math.min(W-M,S.x+rnd(-150,150))), y=Math.max(M,Math.min(H-M,S.y+rnd(-150,150)));
+      flyTo(x,y,true);
+    }
+  });
+})();
+</script>
+</body>
+</html>
