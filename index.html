@@ -210,7 +210,7 @@ try{ if(/^https?:$/.test(location.protocol)) document.getElementById('fBase').va
   var fly=document.getElementById('fly');
   fly.innerHTML=FLY_SVG;
   var W=innerWidth, H=innerHeight;
-  var FS=Math.max(38, Math.min(52, Math.min(W,H)*0.1));
+  var FS=Math.max(64, Math.min(96, Math.min(W,H)*0.18));
   document.documentElement.style.setProperty('--fs', FS+'px');
   addEventListener('resize',function(){ W=innerWidth; H=innerHeight; });
 
